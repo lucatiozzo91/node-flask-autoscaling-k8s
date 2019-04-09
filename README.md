@@ -18,7 +18,7 @@ The example is tested on GKE
 * Let's Encrypt
 
 
-##Project Structure:
+## Project Structure:
 * Ingress Folder: ingress yaml and SSL config file
 * k8s Folder: yaml file for the 3: service, deployments and hpa
 * Monitoring Folder: conf for prometheus prometheus-adapter and grafana dashboard
