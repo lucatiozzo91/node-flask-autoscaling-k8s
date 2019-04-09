@@ -1,0 +1,28 @@
+version: "3.5"
+
+services:
+  order:
+    build:
+      context: order
+
+    image: myregistry/order:latest
+    ports:
+      - "5000:5000"
+    environment:
+      DEBUG: "true"
+  product:
+    build:
+      context: product
+
+    image: myregistry/product:latest
+    ports:
+      - "3000:3000"
+  user:
+    build:
+      context: user
+
+    image: myregistry/user:latest
+    ports:
+      - "8080:8080"
+
+

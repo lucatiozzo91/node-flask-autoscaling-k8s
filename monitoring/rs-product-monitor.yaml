@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: monitoring-prometheus-product
+  namespace: default
+  labels:
+    prometheus: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: rs
+      component: product
+      language: node
+  endpoints:
+    - port: web
+      interval: 15s
+      path: /metrics
+  namespaceSelector:
+    any: true

@@ -1,0 +1,98 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: rs
+    component: user
+    language: go
+  name: rs-user
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rs
+      component: user
+      language: go
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: rs
+        component: user
+        language: go
+    spec:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                      - "rs"
+                  - key: "component"
+                    operator: In
+                    values:
+                      - "user"
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+      - env:
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        image: myregistry/user:latest
+        imagePullPolicy: Always
+        name: rs-user
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "10m"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 3
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: gitlab
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rs
+    component: user
+    language: go
+  name: rs-user
+  namespace: default
+
+spec:
+  ports:
+  - name: web
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: rs
+    component: user
+    language: go
+  type: NodePort

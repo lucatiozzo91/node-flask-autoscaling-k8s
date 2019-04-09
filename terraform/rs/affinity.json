@@ -1,0 +1,1 @@
+{"spec":{"template":{"spec":{"affinity":{"podAntiAffinity":{"requiredDuringSchedulingIgnoredDuringExecution":[{"labelSelector":{"matchExpressions":[{"key":"app","operator":"In","values":["rs"]},{"key":"component","operator":"In","values":["user"]}]},"topologyKey":"kubernetes.io/hostname"}]}}}}}}}}}

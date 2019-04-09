@@ -1,0 +1,15 @@
+logLevel: 6
+
+prometheus:
+  url: http://monitoring-prometheus-oper-prometheus.default.svc
+  port: 9090
+rules:
+  custom:
+  - seriesQuery: '{namespace!="",__name__!~"^container_.*",service="rs-product"}'
+    seriesFilters: []
+    resources:
+      template: <<.Resource>>
+    name:
+      matches: ^(.*)_duration_seconds_count$
+      as: "${1}_rate_per_second"
+    metricsQuery: sum(rate(<<.Series>>{<<.LabelMatchers>>}[1m])) by (<<.GroupBy>>) / sum(up{<<.LabelMatchers>>}) by (<<.GroupBy>>)

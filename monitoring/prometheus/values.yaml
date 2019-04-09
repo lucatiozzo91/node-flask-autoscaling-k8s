@@ -1,0 +1,32 @@
+grafana:
+  adminPassword: prom-operator
+
+
+prometheus:
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: standard
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+        selector: {}
+
+    additionalServiceMonitors:
+      - name: monitoring-prometheus-product
+        additionalLabels:
+          prometheus: monitoring
+        selector:
+          matchLabels:
+            app: rs
+            component: product
+            language: node
+        endpoints:
+          - port: web
+            interval: 15s
+            path: /metrics
+        namespaceSelector:
+          any: true

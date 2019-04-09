@@ -1,0 +1,4 @@
+flask==1.0.2
+gunicorn==19.9.0
+prometheus_flask_exporter
+requests

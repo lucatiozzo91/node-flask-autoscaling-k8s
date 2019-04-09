@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: rs
+  annotations:
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    certmanager.k8s.io/acme-http01-edit-in-place: "true"
+    kubernetes.io/ingress.class: nginx
+  labels:
+    app: rs
+spec:
+  rules:
+    - host: product.mydomain.domain
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: rs-product
+            servicePort: 80
+    - host: order.mydomain.domain
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: rs-order
+              servicePort: 80
+    - host: user.mydomain.domain
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: rs-user
+              servicePort: 80
+  tls:
+  - secretName: product-mydomain-domain-tls
+    hosts:
+    - product.mydomain.domain
+  - secretName: order-mydomain-domain-tls
+    hosts:
+    - order.mydomain.domain
+  - secretName: user-mydomain-domain-tls
+    hosts:
+    - user.mydomain.domain

@@ -1,0 +1,98 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: rs
+    component: order
+    language: python
+  name: rs-order
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rs
+      component: order
+      language: python
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: rs
+        component: order
+        language: python
+    spec:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                      - "rs"
+                  - key: "component"
+                    operator: In
+                    values:
+                      - "order"
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+      - env:
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        image: myregistry/order:latest
+        imagePullPolicy: Always
+        name: rs-order
+        ports:
+        - containerPort: 5000
+          protocol: TCP
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "10m"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 5000
+          initialDelaySeconds: 3
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 5000
+          initialDelaySeconds: 3
+          periodSeconds: 3
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: gitlab
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rs
+    component: order
+    language: python
+  name: rs-order
+  namespace: default
+
+spec:
+  ports:
+  - name: web
+    port: 80
+    protocol: TCP
+    targetPort: 5000
+  selector:
+    app: rs
+    component: order
+    language: python
+  type: NodePort
